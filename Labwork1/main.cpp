@@ -1,5 +1,4 @@
 #include <iostream>
-#include <cstdlib>
 
 using namespace std;
 
@@ -19,22 +18,9 @@ public:
     int multiply(int a, int b) { return a * b; }
     double multiply(double a, double b) { return a * b; }
 
-    // Bolme: ikinci parametre 0 ise hata mesaji verip programi sonlandir
-    int divide(int a, int b) {
-        if (b == 0) {
-            cout << "Division by zero error!" << endl;
-            exit(1);
-        }
-        return a / b;
-    }
-
-    double divide(double a, double b) {
-        if (b == 0.0) {
-            cout << "Division by zero error!" << endl;
-            exit(1);
-        }
-        return a / b;
-    }
+    // Bolme (sifira bolme kontrolu main icinde yapiliyor)
+    int divide(int a, int b) { return a / b; }
+    double divide(double a, double b) { return a / b; }
 };
 
 } // namespace Math
@@ -68,12 +54,13 @@ int main() {
         case '*':
             cout << "Multiplication of " << i1 << " and " << i2 << " is: " << calc.multiply(i1, i2) << endl;
             break;
-        case '/': {
-            // Once hesapla: bolen 0 ise hata mesaji yarim satirin arkasina yazilmasin
-            int result = calc.divide(i1, i2);
-            cout << "Division of " << i1 << " by " << i2 << " is: " << result << endl;
+        case '/':
+            if (i2 == 0) {
+                cout << "Division by zero error!" << endl;
+                return 1; // main'den return etmek programi sonlandirir
+            }
+            cout << "Division of " << i1 << " by " << i2 << " is: " << calc.divide(i1, i2) << endl;
             break;
-        }
         default:
             cout << "Invalid operator: " << intOp << endl;
     }
@@ -89,11 +76,13 @@ int main() {
         case '*':
             cout << "Multiplication of " << d1 << " and " << d2 << " is: " << calc.multiply(d1, d2) << endl;
             break;
-        case '/': {
-            double result = calc.divide(d1, d2);
-            cout << "Division of " << d1 << " by " << d2 << " is: " << result << endl;
+        case '/':
+            if (d2 == 0.0) {
+                cout << "Division by zero error!" << endl;
+                return 1;
+            }
+            cout << "Division of " << d1 << " by " << d2 << " is: " << calc.divide(d1, d2) << endl;
             break;
-        }
         default:
             cout << "Invalid operator: " << doubleOp << endl;
     }
