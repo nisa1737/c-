@@ -3,7 +3,17 @@
 2) Write a C++ program that implements the following structure, for the purpose of developing
 a telemetry logging system:
 
-> (The structure diagram was not included in the text; it will be added here.)
+```
++-----------------------------------+
+|            <<struct>>             |
+|        TelemetryProcessor         |
++-----------------------------------+
+| +calibrationFactor: T             |
++-----------------------------------+
+| +testPassByValue(T): void         |
+| +testPassByReference(T&): void    |
++-----------------------------------+
+```
 
 `testPassByValue()` function will take a T type variable and will multiply the value given as
 a parameter with the `calibrationFactor` (recognize pass-by-value behavior),
@@ -21,9 +31,11 @@ of `userReading` after each operation.
 ```
 Enter the calibration factor: 2.7
 Enter a raw sensor reading value (e.g., 25.5): 20
+
 Before pass-by-value function, userReading = 20
 [Inside testPassByValue] Modified copy inside function: 54
 After pass-by-value function, userReading = 20 (Unchanged!)
+
 Before pass-by-reference function, userReading = 20
 [Inside testPassByReference] Modified original via reference: 54
 After pass-by-reference function, userReading = 54 (Changed & Persisted!)
