@@ -1,6 +1,7 @@
 # CENG241 – Midterm Hazırlık Soruları
 
 Bu dosyadaki sorular, Week 6 recitation'daki Ex 1–7 sorularına **benzer ama farklı** sorulardır.
+Sadece derste, lab'larda ve recitation'da gördüğün konular var; **yeni konu yok**.
 Bütün kodlar derlenip çalıştırıldı; cevaplardaki çıktılar gerçek çıktılardır.
 
 **Nasıl çalışmalısın?**
@@ -12,11 +13,11 @@ Bütün kodlar derlenip çalıştırıldı; cevaplardaki çıktılar gerçek ç�
 | Soru | Tür | Benzediği recitation sorusu | Konu |
 |---|---|---|---|
 | 1 | Çıktı bulma | Ex 1 | constructor seçimi, `&`, varsayılan parametre, destructor sırası |
-| 2 | Çıktı bulma | Ex 2 | aynı konular + `{ }` bloğu içinde nesne |
+| 2 | Çıktı bulma | Ex 2 | aynı konular + sonradan oluşturulan üçüncü nesne |
 | 3 | Çıktı bulma | Ex 3 | aynı isimli iki fonksiyon, `::`, yerel/global değişken |
-| 4 | Çıktı bulma | (ders notları) | constructor/destructor sırası, dizi, `new`/`delete` |
+| 4 | Çıktı bulma | (ders notları) | constructor/destructor sırası, nesne dizisi, varsayılan değer |
 | 5 | Çıktı bulma | (ders notları) | namespace, template, varsayılan parametre |
-| 6 | Hata bulma | (ders notları) | referans, const, private, varsayılan parametre kuralları |
+| 6 | Hata bulma | (ders notları) | referans, const, private, namespace kuralları |
 | 7 | Kod yazma | Ex 4 | nesne dizisi, destructor'da çıktı |
 | 8 | Kod yazma | Ex 5 | iki constructor, `if / else if`, nesne dizisi |
 | 9 | Kod yazma | Ex 6 | friend fonksiyon, nesne döndüren fonksiyon |
@@ -69,7 +70,7 @@ int main() {
 
 ### Soru 2
 
-What is the output of the following program? (Dikkat: `main` içinde bir `{ }` bloğu var.)
+What is the output of the following program?
 
 ```cpp
 #include <iostream>
@@ -99,10 +100,8 @@ int main() {
     int x = 1, y = 3;
     Node n1(4), n2(2, 5);
     total = n1.mix(x, y);
-    {
-        Node n3(total);
-        total = n3.mix(y);
-    }
+    Node n3(total);
+    total = n3.mix(y);
     total = n2.mix(x);
     cout << x << " " << y << " " << total << endl;
 }
@@ -182,16 +181,11 @@ public:
 
 int main() {
     Item a(1);
-    Item arr[2];
-    Item *p = new Item(5);
-    {
-        Item b(2);
-        cout << "| ";
-    }
-    Item *q = new Item[2];
-    delete p;
     cout << "| ";
-    delete[] q;
+    Item arr[3] = {7, 8, 9};
+    cout << "| ";
+    Item b;
+    Item c(4);
     cout << "| ";
     return 0;
 }
@@ -241,7 +235,7 @@ int main() {
 
 ### Soru 6
 
-Aşağıdaki 9 kod parçasının **hangileri derleme hatası verir? Neden?**
+Aşağıdaki 7 kod parçasının **hangileri derleme hatası verir? Neden?**
 Hata vermeyen varsa çıktısını yaz.
 (Hepsinin başında `#include <iostream>` ve `using namespace std;` olduğunu düşün.)
 
@@ -257,8 +251,14 @@ int main() {
 
 **b)**
 ```cpp
-void f(int x = 1, int y);
-int main() { }
+void f(const int &x) {
+    x = 10;
+}
+int main() {
+    int a = 8;
+    f(a);
+    cout << a;
+}
 ```
 
 **c)**
@@ -268,7 +268,9 @@ class A {
 public:
     A(int x) { c = x; }
 };
-int main() { A a(3); }
+int main() {
+    A a(3);
+}
 ```
 
 **d)**
@@ -279,22 +281,13 @@ public:
     B(int x) : v(x) {}
     void show() const { v = v + 1; cout << v; }
 };
-int main() { B b(1); b.show(); }
-```
-
-**e)**
-```cpp
-class C {
-    int v;
-public:
-    C(int x) : v(x) {}
-};
 int main() {
-    C arr[3];
+    B b(1);
+    b.show();
 }
 ```
 
-**f)**
+**e)**
 ```cpp
 class D {
     int v;
@@ -307,24 +300,18 @@ int main() {
 }
 ```
 
+**f)**
+```cpp
+namespace first { int x = 5; }
+namespace second { int x = 10; }
+using namespace first;
+using namespace second;
+int main() {
+    cout << x << endl;
+}
+```
+
 **g)**
-```cpp
-void h(int &x) { x++; }
-int main() {
-    h(5);
-}
-```
-
-**h)**
-```cpp
-void k(int a) { cout << a; }
-void k(int a, int b = 2) { cout << a + b; }
-int main() {
-    k(3);
-}
-```
-
-**i)**
 ```cpp
 class E {
     int v;
@@ -355,12 +342,11 @@ Define a **class Vehicle** including the following:
 - **calculateFee():** To calculate the fee (fee = ratePerHour * hours). If the vehicle is parked **more than 10 hours**, a **20% discount** is applied.
 - **Destructor (~Vehicle()):** To output the plate number and the calculated fee.
 
-The main function should ask the number of vehicles (at most 50), create the array **dynamically**,
-take the inputs, and output the plate numbers along with the fees.
-Do not forget to free the memory.
+The main function should declare an array for up to 50 vehicles, take their input,
+and output their plate numbers along with their fees.
 
 **Türkçesi:** Otopark ücreti hesaplayan bir program. `Vehicle` sınıfı yaz. Ücret = saatlik ücret × saat;
-10 saatten fazla kalana %20 indirim. Sonuçları **destructor** yazdıracak. Diziyi `new` ile oluştur, `delete[]` ile sil.
+10 saatten fazla kalana %20 indirim. Sonuçları **destructor** yazdıracak. En fazla 50 araçlık dizi kullan.
 
 Sample Run:
 
@@ -555,9 +541,9 @@ b2:  w = 1   h = 4
 ```
 6 0 6 5
 10 -3 10 4
-10 4 7
 11 0 4 5
 11 10 11
+10 4 11
 4 5 11
 6 5 11
 ```
@@ -588,7 +574,7 @@ n2:  a = 2   b = 5
 | `cout` | ekrana **`6 0 6 5`** |
 | `return m + n;` | 6 + 0 = 6 → **total = 6** |
 
-**4) Blok başlar: `Node n3(total);`** → total şu an 6, yani `n3(6)`: a = 5, b = 7.
+**4) `Node n3(total);`** → total şu an 6, yani `n3(6)`. Tek sayı: a = 6 − 1 = 5, b = 6 + 1 = 7.
 
 **5) `total = n3.mix(y);`** → m = y'nin kendisi (3), n = **2** (varsayılan), a ve b **n3'ün**.
 
@@ -601,9 +587,7 @@ n2:  a = 2   b = 5
 | `cout` | ekrana **`10 -3 10 4`** |
 | `return m + n;` | 10 + (−3) = 7 → **total = 7** |
 
-**6) Blok biter (`}`)** → n3 **hemen** yok olur, destructor'ı çalışır: **`10 4 7`**
-
-**7) `total = n2.mix(x);`** → m = x'in kendisi (6), n = 2 (varsayılan), a ve b **n2'nin**.
+**6) `total = n2.mix(x);`** → m = x'in kendisi (6), n = 2 (varsayılan), a ve b **n2'nin**.
 
 | Satır | Ne oluyor? |
 |---|---|
@@ -614,11 +598,22 @@ n2:  a = 2   b = 5
 | `cout` | ekrana **`11 0 4 5`** |
 | `return m + n;` | 11 + 0 = 11 → **total = 11** |
 
-**8) `cout << x << y << total`** → **`11 10 11`**
+```
+total = 11
+x = 11   y = 10
+n1:  a = 6    b = 5
+n2:  a = 4    b = 5
+n3:  a = 10   b = 4
+```
 
-**9) main biter:** önce n2 → **`4 5 11`**, sonra n1 → **`6 5 11`**
+**7) `cout << x << y << total`** → **`11 10 11`**
 
-**Tuzaklar:** Blok içinde oluşturulan nesne (**n3**), `main` bitmeden, **blok biter bitmez** yok olur. O anda total 7 olduğu için 7 yazar; diğerleri en sonda 11 yazar.
+**8) main biter, destructor'lar ters sırayla:** n3 → **`10 4 11`**, n2 → **`4 5 11`**, n1 → **`6 5 11`**
+
+**Tuzaklar:**
+- `n3(total)` yazıldığı anda total **6**'dır; n3 o değerle oluşur. total sonradan değişse de n3'ün a ve b'si etkilenmez.
+- n3 en son oluşturuldu, bu yüzden **ilk o** yok olur.
+- Üç destructor da total'in **son** değerini (11) yazar.
 
 ---
 
@@ -696,7 +691,7 @@ Başlangıç: `value = 5` (global), `x = 10`, `y = 20`
 **Output:**
 
 ```
-C1 C0 C0 C5 C2 | D2 C0 C0 D5 | D0 D0 | D0 D0 D1
+C1 | C7 C8 C9 | C0 C4 | D4 D0 D9 D8 D7 D1
 ```
 
 **Çözüm:**
@@ -706,22 +701,18 @@ C1 C0 C0 C5 C2 | D2 C0 C0 D5 | D0 D0 | D0 D0 D1
 | Satır | Ne oluyor? | Ekran |
 |---|---|---|
 | `Item a(1);` | a oluşur | `C1` |
-| `Item arr[2];` | 2 nesne, değer yok → id = 0 | `C0 C0` |
-| `Item *p = new Item(5);` | `new` ile nesne | `C5` |
-| `{ Item b(2);` | blok içinde b oluşur | `C2` |
 | `cout << "\| ";` | | `\|` |
-| `}` | blok bitti → **b yok olur** | `D2` |
-| `Item *q = new Item[2];` | `new` ile 2 nesnelik dizi | `C0 C0` |
-| `delete p;` | p'nin gösterdiği nesne yok olur | `D5` |
+| `Item arr[3] = {7, 8, 9};` | 3 nesne; her değer bir elemana gider | `C7 C8 C9` |
 | `cout << "\| ";` | | `\|` |
-| `delete[] q;` | dizideki 2 nesne yok olur | `D0 D0` |
+| `Item b;` | değer yok → id = **0** (varsayılan) | `C0` |
+| `Item c(4);` | c oluşur | `C4` |
 | `cout << "\| ";` | | `\|` |
-| main biter | önce `arr` (2 nesne), sonra `a` | `D0 D0 D1` |
+| main biter | oluşturulma sırasının **tersi**: c, b, arr, a | `D4 D0 D9 D8 D7 D1` |
 
 **Tuzaklar:**
-- `new` ile oluşturulan nesneler **kendiliğinden yok olmaz**; destructor ancak `delete` yazılınca çalışır.
-- Blok içindeki nesne, blok bitince yok olur.
-- main bitince yok olma sırası oluşturulma sırasının **tersidir**: `arr` sonra oluştu, önce o yok olur.
+- `Item b;` satırında parantez yok ama constructor yine çalışır; id varsayılan değeri (0) alır.
+- Dizinin elemanları da **kendi içinde ters sırayla** yok olur: önce arr[2] (9), sonra arr[1] (8), en son arr[0] (7).
+- Bütün `D` yazıları son `|` işaretinden **sonra** çıkar, çünkü nesneler `main` bitince yok olur.
 
 ---
 
@@ -771,14 +762,12 @@ C1 C0 C0 C5 C2 | D2 C0 C0 D5 | D0 D0 | D0 D0 D1
 | | Sonuç | Neden? |
 |---|---|---|
 | **a** | **HATA** | Referans, tanımlandığı satırda bir değişkene bağlanmalı. Doğrusu: `int &r = a;` |
-| **b** | **HATA** | Varsayılan değerler **sağdan** başlamalı. x'e varsayılan verip y'ye vermemek olmaz. Doğrusu: `void f(int x, int y = 1);` |
+| **b** | **HATA** | `const int &x` salt okunurdur; `x = 10;` yazılamaz. (Derste gördüğün "assignment of read-only reference" hatası.) |
 | **c** | **HATA** | `const` üyeye constructor gövdesinde atama yapılamaz. Doğrusu: `A(int x) : c(x) { }` |
 | **d** | **HATA** | Sonunda `const` olan fonksiyon nesnenin değişkenlerini değiştiremez (`v = v + 1` yasak). |
-| **e** | **HATA** | `C arr[3];` her eleman için **parametresiz constructor** ister. Sınıfta sadece `C(int)` var. |
-| **f** | **HATA** | `v` private; `main` içinden `d.v` yazılamaz. |
-| **g** | **HATA** | `int &x` parametresine **değişken** gönderilmeli. `5` gibi sabit bir sayı gönderilemez. |
-| **h** | **HATA** | `k(3)` çağrısı iki fonksiyona da uyuyor (`k(int)` ve varsayılan değerli `k(int, int)`). Derleyici seçemez: belirsizlik. |
-| **i** | **Hata yok** | Çıktı: `5`. `E e;` → v = 0; `add(2)` → 2; `add(3)` → 5; `show()` → 5. |
+| **e** | **HATA** | `v` private; `main` içinden `d.v` yazılamaz. Okumak için public bir `getV()` fonksiyonu gerekir. |
+| **f** | **HATA** | İki namespace'te de `x` var ve ikisi de `using` ile açılmış. `x` yazınca hangisi olduğu belirsiz. Doğrusu: `first::x` ya da `second::x` |
+| **g** | **Hata yok** | Çıktı: `5`. `E e;` → v = 0 (varsayılan); `add(2)` → 2; `add(3)` → 5; `show()` → 5. |
 
 ---
 
@@ -822,14 +811,12 @@ int main() {
         n = SIZE;
     }
 
-    Vehicle *vehicles = new Vehicle[n];
+    Vehicle vehicles[n];
 
     for (int i = 0; i < n; i++) {
         vehicles[i].input();
         vehicles[i].calculateFee();
     }
-
-    delete[] vehicles;
 
     return 0;
 }
@@ -849,14 +836,15 @@ Fee of vehicle 34 is 60
 
 **Hesaplar:** 15 × 4 = 60 · 20 × 12 = 240, 10 saatten fazla olduğu için 240 × 0.8 = 192 · 10 × 2.5 = 25
 
-**Ek sorunun cevabı:** Sonuçları **destructor** yazdırıyor. `delete[]` dizideki nesneleri **oluşturulma sırasının tersine**
-yok eder: önce son eleman, en son ilk eleman. Bu yüzden 35 → 6 → 34 sırası çıkıyor.
+**Ek sorunun cevabı:** Sonuçları **destructor** yazdırıyor. `main` bitince dizideki nesneler
+**oluşturulma sırasının tersine** yok edilir: önce son eleman, en son ilk eleman. Bu yüzden 35 → 6 → 34 sırası çıkıyor.
+(Ex 4'ün örnek çıktısında da 102, 101'den önce yazılıyordu.)
 
 **Dikkat edilecekler:**
-- `main` içinde hiç `cout` ile sonuç yazdırmadık; yazdırma işi destructor'da.
-- `n > SIZE` kontrolü dizi oluşturulmadan **önce** yapılmalı.
-- `new Vehicle[n]` yazdıysan `delete[]` yazmayı unutma. Unutursan destructor'lar hiç çalışmaz ve **ekrana hiçbir şey çıkmaz**.
-- Recitation'daki Ex 4 çözümünde `Employee employees[n];` yazılmış. Bu g++'ta çalışır ama standart C++ değildir; `new` ile yazmak her derleyicide çalışır.
+- Hocanın Ex 4 çözümüyle **aynı kalıp**: `input()`, hesaplama fonksiyonu, sonucu yazdıran destructor, `Sinif dizi[n];` ve `for` döngüsü.
+- `main` içinde sonucu yazdıran bir `cout` yok; yazdırma işi destructor'da.
+- `fee = fee * 0.8;` → %20 indirim, ücretin %80'ini almak demek.
+- `hours > 10` yazıldı, `>=` değil: soru "**more than** 10 hours" diyor.
 
 ---
 

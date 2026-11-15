@@ -1,27 +1,29 @@
-# CENG241 – Ek Örnekler (Başka ne öğrenebilirim?)
+# CENG241 – Ek Örnekler
 
-Bu dosyadaki örnekler, derste ve recitation'da gördüğün konuların **bir adım ötesini** gösteriyor.
-Her biri küçük, tek bir fikri anlatıyor ve sınavda "çıktı nedir?" ya da "hata nerede?" diye sorulabilecek türden.
+Bu dosyadaki örneklerin **hepsi** derste, lab'larda ve recitation'da gördüğün konulardan.
+**Yeni konu yok**; aynı konuların farklı örnekleri var.
 Bütün kodlar derlenip çalıştırıldı; çıktılar gerçek çıktılardır.
 
 **Nasıl çalışmalısın?** Önce kodu oku ve çıktıyı **tahmin et**, sonra aşağıdaki çıktıyla karşılaştır.
 
-| Örnek | Konu | Zorluk |
+| Örnek | Konu | Bu konuyu nerede gördün? |
 |---|---|---|
-| 1 | İç içe bloklarda aynı isimli değişkenler (`::`) | kolay |
-| 2 | Template + referans: iki değişkeni yer değiştirme | kolay |
-| 3 | Nesneyi fonksiyona göndermek: kopya mı, kendisi mi? | orta |
-| 4 | Zincirlemede `&` unutulursa ne olur? | orta |
-| 5 | Yeni nesne döndüren fonksiyon | orta |
-| 6 | `const` nesne ve `const` fonksiyon | orta |
-| 7 | `new` ile oluşturulan nesne `delete` edilmezse | orta |
-| 8 | `->` ile `(*p).` ve pointer / referans parametre | orta |
-| 9 | İki sınıfın ortak friend fonksiyonu | zor |
-| 10 | `static` üye (muhtemelen sıradaki konu) | ileri |
+| 1 | Yerel ve global değişken, `::` | ders (`::x` örneği), Ex 3 |
+| 2 | Template + referans | ders (`sum` template'i, `f(int, int&)`) |
+| 3 | Aynı isimli fonksiyonlar + varsayılan parametre | Labwork 1 (Calculator), ders (`f(int x=1, int y=5)`) |
+| 4 | Struct template | Labwork 1 (TelemetryProcessor) |
+| 5 | `const` ve referans üye: initialization list | ders (class R, class S) |
+| 6 | Dinamik bellek kullanan sınıf | ders (class B, `parr`), Labwork 2 |
+| 7 | Zincirlemede `&` unutulursa | Labwork 3, Ex 7, personType |
+| 8 | Yeni nesne döndüren fonksiyon | Ex 6, ders (Complex `add`) |
+| 9 | `const` referans parametre ve `const` fonksiyon | Ex 6, Labwork 4, personType |
+| 10 | `.` , `->` ve `(*p).` | ders (Rational) |
+| 11 | Friend class | ders (class A / class B) |
+| 12 | İki sınıfın ortak friend fonksiyonu | ders (Complex `add`, `class B;` ön bildirimi) |
 
 ---
 
-## Örnek 1 – İç içe bloklarda aynı isimli değişkenler
+## Örnek 1 – Yerel ve global değişken, `::`
 
 ```cpp
 #include <iostream>
@@ -29,14 +31,21 @@ using namespace std;
 
 int x = 1;
 
+void change() {
+    int x = 5;
+    ::x = ::x + x;
+    cout << x << " " << ::x << endl;
+}
+
 int main() {
     int x = 2;
-    {
-        int x = 3;
-        cout << x << " " << ::x << endl;
-        ::x = 10;
-    }
+
+    change();
     cout << x << " " << ::x << endl;
+
+    change();
+    cout << x << " " << ::x << endl;
+
     return 0;
 }
 ```
@@ -44,24 +53,31 @@ int main() {
 **Çıktı:**
 
 ```
-3 1
-2 10
+5 6
+2 6
+5 11
+2 11
 ```
 
 **Ne öğretiyor?**
 
-Üç tane `x` var: global (1), main'in yereli (2), bloğun yereli (3).
+Üç tane `x` var: global (1), `change` fonksiyonunun yereli (5), `main`'in yereli (2).
 
-- Sadece `x` yazınca **en yakındaki** kullanılır: bloğun içinde 3, bloğun dışında 2.
-- `::x` her zaman **global** olanı verir.
-- Blok içinde `::x = 10;` global x'i değiştirdi; main'in yerel x'i (2) **etkilenmedi**.
-- Bloğun x'i (3), blok bitince yok oldu.
+| Satır | Ne oluyor? | Ekran |
+|---|---|---|
+| 1. `change()` | yerel x = 5; global x = 1 + 5 = 6 | `5 6` |
+| `cout` (main) | main'in x'i 2, global 6 | `2 6` |
+| 2. `change()` | yerel x **yeniden** 5; global x = 6 + 5 = 11 | `5 11` |
+| `cout` (main) | main'in x'i hâlâ 2, global 11 | `2 11` |
 
-`::` ile main'in yerel x'ine ulaşmanın yolu **yoktur**; `::` sadece globale gider.
+- Sadece `x` yazınca **o fonksiyonun yereli**, `::x` yazınca **global** kullanılır.
+- Yerel değişken fonksiyon **her çağrıldığında baştan** oluşur (hep 5).
+- Global değişken değerini **korur** (1 → 6 → 11).
+- `change` fonksiyonu `main`'in yerel x'ine (2) **hiç dokunamaz**.
 
 ---
 
-## Örnek 2 – Template + referans: yer değiştirme
+## Örnek 2 – Template + referans
 
 ```cpp
 #include <iostream>
@@ -74,13 +90,18 @@ void swapValues(T &a, T &b) {
     b = temp;
 }
 
-template <class T, class U>
-void printPair(T a, U b) {
-    cout << a << " - " << b << endl;
+template <class T>
+void noSwap(T a, T b) {
+    T temp = a;
+    a = b;
+    b = temp;
 }
 
 int main() {
     int a = 3, b = 7;
+    noSwap(a, b);
+    cout << a << " " << b << endl;
+
     swapValues(a, b);
     cout << a << " " << b << endl;
 
@@ -88,8 +109,6 @@ int main() {
     swapValues(c, d);
     cout << c << " " << d << endl;
 
-    printPair(5, 2.5);
-    printPair('A', 10);
     return 0;
 }
 ```
@@ -97,48 +116,43 @@ int main() {
 **Çıktı:**
 
 ```
+3 7
 7 3
 2.5 1.5
-5 - 2.5
-A - 10
 ```
 
 **Ne öğretiyor?**
 
-- `swapValues(T &a, T &b)`: Parametreler **referans** olduğu için main'deki değişkenler gerçekten yer değiştirir. `&` olmasaydı sadece kopyalar değişirdi ve çıktı `3 7` olurdu.
-- Aynı fonksiyon hem `int` hem `double` için çalışıyor: template sayesinde.
-- `template <class T, class U>`: **iki farklı tip** almak için iki yer tutucu. `printPair(5, 2.5)` çağrısında T = int, U = double.
+İki fonksiyonun gövdesi **aynı**; tek fark parametrelerdeki `&`.
 
-**Dikkat:** `swapValues(a, c)` (biri int, biri double) **hata verir**; ikisi de aynı `T` olmak zorunda.
+- `noSwap(T a, T b)`: `&` yok. Sadece **kopyalar** yer değiştirir; main'deki a ve b aynı kalır → `3 7`.
+- `swapValues(T &a, T &b)`: `&` var. main'deki değişkenlerin **kendileri** yer değiştirir → `7 3`.
+- Aynı fonksiyon `int` için de `double` için de çalışıyor: **template** sayesinde (T = int, sonra T = double).
 
 ---
 
-## Örnek 3 – Nesneyi fonksiyona göndermek: kopya mı, kendisi mi?
+## Örnek 3 – Aynı isimli fonksiyonlar + varsayılan parametre
 
 ```cpp
 #include <iostream>
 using namespace std;
 
-class Box {
-    int v;
-public:
-    Box(int x) : v(x) { cout << "C" << v << endl; }
-    ~Box() { cout << "D" << v << endl; }
-    void set(int x) { v = x; }
-    int get() const { return v; }
-};
+int area(int side) { return side * side; }
+int area(int w, int h) { return w * h; }
+double area(double r) { return 3.14 * r * r; }
 
-void byValue(Box b) { b.set(99); }
-void byRef(Box &b) { b.set(99); }
+void print(int a, int b = 10, int c = 100) {
+    cout << a << " " << b << " " << c << endl;
+}
 
 int main() {
-    Box a(1);
+    cout << area(4) << endl;
+    cout << area(4, 5) << endl;
+    cout << area(2.0) << endl;
 
-    byValue(a);
-    cout << a.get() << endl;
-
-    byRef(a);
-    cout << a.get() << endl;
+    print(1);
+    print(1, 2);
+    print(1, 2, 3);
 
     return 0;
 }
@@ -147,33 +161,221 @@ int main() {
 **Çıktı:**
 
 ```
-C1
-D99
-1
-99
-D99
+16
+20
+12.56
+1 10 100
+1 2 100
+1 2 3
 ```
 
 **Ne öğretiyor?**
 
-`int` için öğrendiğin kural nesneler için de aynen geçerli.
+**Function overloading:** Üç tane `area` var. Derleyici, gönderilen değerlerin **sayısına ve tipine** bakarak seçer.
 
-| Satır | Ne oluyor? | Ekran |
+| Çağrı | Çalışan fonksiyon | Sonuç |
 |---|---|---|
-| `Box a(1);` | a oluşur | `C1` |
-| `byValue(a);` | a'nın **kopyası** oluşur, kopya 99 yapılır, fonksiyon bitince **kopya yok olur** | `D99` |
-| `cout << a.get()` | a değişmedi | `1` |
-| `byRef(a);` | a'nın **kendisi** 99 yapılır, yok olan bir şey yok | |
-| `cout << a.get()` | a değişti | `99` |
-| main biter | a yok olur | `D99` |
+| `area(4)` | `area(int side)` | 4 × 4 = 16 |
+| `area(4, 5)` | `area(int w, int h)` | 4 × 5 = 20 |
+| `area(2.0)` | `area(double r)` | 3.14 × 2 × 2 = 12.56 |
 
-**İlginç nokta:** Kopya oluşurken ekrana `C` **yazılmadı** ama yok olurken `D99` yazıldı. Çünkü kopyalar, derleyicinin kendiliğinden yazdığı ayrı bir constructor ile (copy constructor) oluşturulur ve o ekrana bir şey yazmaz. Destructor ise kopya için de çalışır.
+**Tuzak:** `area(2)` yazsaydın (noktasız) **int** sürümü çalışır ve 4 çıkardı. `2.0` yazdığın için double sürümü çalıştı.
 
-**Sınavda nasıl sorulur?** "Kaç tane D satırı çıkar?" Cevap: nesne sayısı + **değerle gönderilen her çağrı için 1 tane daha**.
+**Varsayılan parametre:** Gönderilen değerler **soldan sağa** yerleşir, eksik kalanlar varsayılan değeri alır.
+
+| Çağrı | a | b | c |
+|---|---|---|---|
+| `print(1)` | 1 | 10 (varsayılan) | 100 (varsayılan) |
+| `print(1, 2)` | 1 | 2 | 100 (varsayılan) |
+| `print(1, 2, 3)` | 1 | 2 | 3 |
 
 ---
 
-## Örnek 4 – Zincirlemede `&` unutulursa ne olur?
+## Örnek 4 – Struct template
+
+```cpp
+#include <iostream>
+using namespace std;
+
+template <class T>
+struct Pair {
+    T first;
+    T second;
+
+    T sum() { return first + second; }
+
+    void swapItems() {
+        T temp = first;
+        first = second;
+        second = temp;
+    }
+};
+
+int main() {
+    Pair<int> p;
+    p.first = 3;
+    p.second = 9;
+    cout << p.sum() << endl;
+
+    Pair<double> d;
+    d.first = 1.5;
+    d.second = 2.25;
+    d.swapItems();
+    cout << d.first << " " << d.second << " " << d.sum() << endl;
+
+    return 0;
+}
+```
+
+**Çıktı:**
+
+```
+12
+2.25 1.5 3.75
+```
+
+**Ne öğretiyor?**
+
+Labwork 1'deki `TelemetryProcessor<double>` ile aynı kalıp.
+
+- `template <class T>` struct'ın üstüne yazılır; içerideki bütün `T`'ler sonradan seçilen tipe dönüşür.
+- Nesne oluştururken tipi **sen yazarsın**: `Pair<int>`, `Pair<double>`.
+- `struct` olduğu için üyeler varsayılan olarak **public**; `p.first = 3;` diye doğrudan erişebiliyoruz.
+
+| Nesne | T | first, second | İşlem | Ekran |
+|---|---|---|---|---|
+| `Pair<int> p` | int | 3, 9 | `sum()` → 3 + 9 | `12` |
+| `Pair<double> d` | double | 1.5, 2.25 | `swapItems()` → 2.25, 1.5; `sum()` → 3.75 | `2.25 1.5 3.75` |
+
+---
+
+## Örnek 5 – `const` ve referans üye: initialization list
+
+```cpp
+#include <iostream>
+using namespace std;
+
+class Account {
+    const int id;
+    int balance;
+    int &ref;
+
+public:
+    Account(int i, int b) : id(i), balance(b), ref(balance) { }
+
+    void deposit(int amount) { ref += amount; }
+
+    void show() const { cout << id << " " << balance << endl; }
+};
+
+int main() {
+    Account a(101, 50);
+    a.show();
+
+    a.deposit(25);
+    a.show();
+
+    return 0;
+}
+```
+
+**Çıktı:**
+
+```
+101 50
+101 75
+```
+
+**Ne öğretiyor?**
+
+- `const int id;` ve `int &ref;` üyelerine değer **sadece initialization list** ile verilebilir. Constructor'ın gövdesinde `id = i;` yazsaydın hata verirdi (derste gördüğün `class R` örneği).
+- `ref(balance)`: `ref`, `balance`'ın **takma adı** oldu. `ref += amount;` yazınca `balance` da artıyor (50 → 75).
+- `id` const olduğu için program boyunca **değiştirilemez**.
+- `show() const`: fonksiyon sadece okuyor.
+
+---
+
+## Örnek 6 – Dinamik bellek kullanan sınıf
+
+```cpp
+#include <iostream>
+using namespace std;
+
+class Scores {
+    int *arr;
+    int size;
+
+public:
+    Scores(int n) {
+        size = n;
+        arr = new int[n];
+        for (int i = 0; i < size; i++)
+            arr[i] = 0;
+        cout << "allocated " << size << endl;
+    }
+
+    ~Scores() {
+        delete[] arr;
+        cout << "freed " << size << endl;
+    }
+
+    void set(int index, int value) {
+        if (index >= 0 && index < size)
+            arr[index] = value;
+        else
+            cout << "Index out of bounds!" << endl;
+    }
+
+    int total() {
+        int t = 0;
+        for (int i = 0; i < size; i++)
+            t += arr[i];
+        return t;
+    }
+};
+
+int main() {
+    Scores s(3);
+
+    s.set(0, 70);
+    s.set(1, 85);
+    s.set(2, 90);
+    s.set(5, 100);
+
+    cout << s.total() << endl;
+
+    return 0;
+}
+```
+
+**Çıktı:**
+
+```
+allocated 3
+Index out of bounds!
+245
+freed 3
+```
+
+**Ne öğretiyor?**
+
+Derste gördüğün `class B` (`parr`) ve Labwork 2 ile aynı kalıp.
+
+| Satır | Ne oluyor? | Ekran |
+|---|---|---|
+| `Scores s(3);` | constructor: `size = 3`, `new int[3]`, hepsi 0 yapılır | `allocated 3` |
+| `s.set(0, 70);` … `s.set(2, 90);` | dizi: 70, 85, 90 | |
+| `s.set(5, 100);` | 5, geçerli indeks değil (0–2) | `Index out of bounds!` |
+| `s.total()` | 70 + 85 + 90 | `245` |
+| main biter | destructor: `delete[] arr` | `freed 3` |
+
+- Bellek **constructor'da alınır**, **destructor'da geri verilir**. `main`'de `delete` yazmaya gerek kalmaz.
+- `size = n;` satırı unutulursa sınır kontrolü çalışmaz (derste konuştuğumuz hata).
+- Destructor mesajı **en sonda** çıkar, çünkü `s` ancak `main` bitince yok olur.
+
+---
+
+## Örnek 7 – Zincirlemede `&` unutulursa
 
 ```cpp
 #include <iostream>
@@ -212,7 +414,7 @@ int main() {
 İki fonksiyonun gövdesi **aynı**; tek fark dönüş tipindeki `&`.
 
 - `Counter& addRef()`: nesnenin **kendisini** döndürür. Üç çağrı da c1 üzerinde çalışır → **3**.
-- `Counter addCopy()`: nesnenin **kopyasını** döndürür. İlk çağrı c2'yi 1 yapar; ikinci ve üçüncü çağrılar **geçici kopyalar** üzerinde çalışır ve c2'ye ulaşmaz → **1**.
+- `Counter addCopy()`: nesnenin **kopyasını** döndürür. İlk çağrı c2'yi 1 yapar; ikinci ve üçüncü çağrılar **kopyalar** üzerinde çalışır, c2'ye ulaşmaz → **1**.
 
 ```
 c2.addCopy()      → c2.n = 1, kopya döner
@@ -224,7 +426,7 @@ c2.addCopy()      → c2.n = 1, kopya döner
 
 ---
 
-## Örnek 5 – Yeni nesne döndüren fonksiyon
+## Örnek 8 – Yeni nesne döndüren fonksiyon
 
 ```cpp
 #include <iostream>
@@ -261,13 +463,13 @@ int main() {
 
 **Ne öğretiyor?**
 
-Ex 6'daki `addition()` ve Soru 9'daki `multiply()` ile aynı kalıp: fonksiyon, sonucu taşıyan **yeni bir nesne** döndürür.
+Ex 6'daki `addition()` ve dersteki `Complex add` ile aynı kalıp: fonksiyon, sonucu taşıyan **yeni bir nesne** döndürür.
 
 - `a.add(b)` → 10 + 20 = 30 liralık **yeni** bir Money döner. `a` ve `b` **değişmez**.
 - `a.add(b).add(c).display();` → dönen 30'luk nesnenin üstüne `add(c)` çağrılır (35), onun üstüne `display()`.
 - Son satır kanıt: `a` hâlâ **10 TL**.
 
-**Örnek 4 ile farkı:** Orada amaç **aynı nesneyi değiştirmekti**, bu yüzden `&` gerekiyordu. Burada amaç **yeni bir sonuç üretmek**, bu yüzden `&` yok ve olmamalı.
+**Örnek 7 ile farkı:**
 
 | Amaç | Dönüş tipi | Örnek |
 |---|---|---|
@@ -276,7 +478,7 @@ Ex 6'daki `addition()` ve Soru 9'daki `multiply()` ile aynı kalıp: fonksiyon, 
 
 ---
 
-## Örnek 6 – `const` nesne ve `const` fonksiyon
+## Örnek 9 – `const` referans parametre ve `const` fonksiyon
 
 ```cpp
 #include <iostream>
@@ -292,18 +494,16 @@ public:
 
 void print(const Temp &t) {
     cout << t.get() << endl;
-    // t.set(0);    // HATA: const nesne ile const olmayan fonksiyon cagrilamaz
+    // t.set(0);    // HATA: t const, set() ise const bir fonksiyon degil
 }
 
 int main() {
     Temp a(25);
-    const Temp b(30);
+    print(a);
 
     a.set(26);
-    // b.set(31);   // HATA: b const
-
     print(a);
-    print(b);
+
     return 0;
 }
 ```
@@ -311,74 +511,21 @@ int main() {
 **Çıktı:**
 
 ```
+25
 26
-30
 ```
 
 **Ne öğretiyor?**
 
-- `const Temp b(30);` → b **değiştirilemez** bir nesne.
-- `const` bir nesne ile sadece **sonunda `const` olan** fonksiyonlar çağrılabilir: `b.get()` olur, `b.set(31)` **hata verir**.
-- `void print(const Temp &t)`: Parametre `const` referans olduğu için fonksiyonun içinde t de const sayılır. `t.get()` olur, `t.set(0)` **hata verir**.
+- `void print(const Temp &t)`: `&` olduğu için kopya yapılmaz, `const` olduğu için fonksiyon t'yi **değiştiremez**.
+- Böyle bir parametreyle sadece **sonunda `const` olan** fonksiyonlar çağrılabilir: `t.get()` olur, `t.set(0)` **hata verir**.
+- `main` içindeki `a` const değil; `a.set(26)` serbest.
 
-**Neden önemli?** Ex 6'da `addition(const Vector3D &v)` ve Labwork 4'te `inspectWeaponLore(const EnchantedWeapon &weapon)` vardı. Böyle bir parametreyle çağıracağın fonksiyonların `const` olması gerekir. Bu yüzden `get...()` ve `display()` gibi **sadece okuyan** fonksiyonların sonuna `const` yazmak iyi bir alışkanlıktır.
-
----
-
-## Örnek 7 – `new` ile oluşturulan nesne `delete` edilmezse
-
-```cpp
-#include <iostream>
-using namespace std;
-
-class A {
-    int id;
-public:
-    A(int i) : id(i) { cout << "C" << id << endl; }
-    ~A() { cout << "D" << id << endl; }
-    void show() const { cout << "id=" << id << endl; }
-};
-
-int main() {
-    A a(1);
-    A *p = new A(2);
-    A *q = new A(3);
-
-    p->show();
-    delete q;
-
-    cout << "main bitiyor" << endl;
-    return 0;
-}
-```
-
-**Çıktı:**
-
-```
-C1
-C2
-C3
-id=2
-D3
-main bitiyor
-D1
-```
-
-**Ne öğretiyor?**
-
-| Nesne | Nasıl oluştu? | Ne zaman yok oldu? |
-|---|---|---|
-| `a` (id 1) | normal | main bitince, kendiliğinden → `D1` |
-| id 3 | `new` | `delete q;` yazılınca → `D3` |
-| id 2 | `new` | **hiç yok olmadı** (`delete p;` yazılmamış) |
-
-Çıktıda **`D2` yok**. `new` ile oluşturulan nesnenin destructor'ı sadece `delete` yazılırsa çalışır. Yazılmazsa bellek geri verilmez: **memory leak**.
-
-**Sınavda nasıl sorulur?** Çıktı sorusunda `new` ile oluşturulan ama `delete` edilmeyen bir nesne koyarlar; onun destructor satırını **yazmaman** gerekir.
+**Neden önemli?** Ex 6'da `addition(const Vector3D &v)`, Labwork 4'te `inspectWeaponLore(const EnchantedWeapon &weapon)` vardı. Bu yüzden `get...()` ve `display()` gibi **sadece okuyan** fonksiyonların sonuna `const` yazılır (personType ve Ex 7'deki gibi).
 
 ---
 
-## Örnek 8 – `->` ile `(*p).` ve pointer / referans parametre
+## Örnek 10 – `.` , `->` ve `(*p).`
 
 ```cpp
 #include <iostream>
@@ -387,9 +534,9 @@ using namespace std;
 class Lamp {
     bool on;
 public:
-    Lamp() : on(false) {}
+    Lamp() { on = false; }
     void toggle() { on = !on; }
-    void show() const {
+    void show() {
         if (on)
             cout << "ON" << endl;
         else
@@ -397,22 +544,24 @@ public:
     }
 };
 
-void switchByPointer(Lamp *l) { l->toggle(); }
-void switchByReference(Lamp &l) { l.toggle(); }
-
 int main() {
     Lamp lamp;
-    Lamp *p = &lamp;
+    lamp.toggle();
+    lamp.show();
 
+    Lamp *p = new Lamp;
     p->show();
-    (*p).toggle();
-    lamp.show();
+    p->toggle();
+    (*p).show();
 
-    switchByPointer(&lamp);
-    lamp.show();
+    Lamp *arr = new Lamp[2];
+    arr[1].toggle();
+    arr[0].show();
+    arr[1].show();
 
-    switchByReference(lamp);
-    lamp.show();
+    delete p;
+    delete[] arr;
+
     return 0;
 }
 ```
@@ -420,6 +569,7 @@ int main() {
 **Çıktı:**
 
 ```
+ON
 OFF
 ON
 OFF
@@ -428,23 +578,80 @@ ON
 
 **Ne öğretiyor?**
 
-- `Lamp *p = &lamp;` → `&lamp`, lamp'in **adresi** demek. p artık lamp'i gösteriyor.
-- **`p->toggle()` ile `(*p).toggle()` tamamen aynı şeydir.** `->`, `(*p).` yazımının kısa yoludur. (`this->x` ile `(*this).x` de aynıdır.)
-- Bir nesneyi fonksiyona **değiştirilebilir** şekilde göndermenin iki yolu var:
+Dersteki `Rational` örneğiyle aynı kalıp.
 
-| | Pointer ile | Referans ile |
+| Elinde ne var? | Örnek | Nasıl kullanılır? |
 |---|---|---|
-| Parametre | `Lamp *l` | `Lamp &l` |
-| Çağrı | `switchByPointer(&lamp);` | `switchByReference(lamp);` |
-| İçeride kullanım | `l->toggle();` | `l.toggle();` |
+| Nesnenin **kendisi** | `Lamp lamp;` | `lamp.show()` |
+| Nesnenin **adresi** | `Lamp *p = new Lamp;` | `p->show()` |
+| Dizinin bir **elemanı** | `arr[1]` | `arr[1].show()` |
 
-İkisi de **asıl lambayı** değiştirir. Lamba dört satırda sırayla OFF → ON → OFF → ON oluyor.
+- **`p->show()` ile `(*p).show()` aynı şeydir.** `*p` "p'nin gösterdiği nesne" demek; `->` bunun kısa yazımı. (`this->x` ile `(*this).x` de aynıdır.)
+- `new Lamp[2]` iki lamba oluşturur; ikisi de constructor'dan dolayı kapalı (OFF) başlar.
+- `new` ile alınan tek nesne `delete`, dizi `delete[]` ile geri verilir.
 
-Labwork 3'teki `registerDevice(DeviceMonitor*)` pointer yolunu, `testPassByReference(T&)` referans yolunu kullanıyordu.
+| Satır | Ekran |
+|---|---|
+| `lamp.toggle(); lamp.show();` | `ON` |
+| `p->show();` | `OFF` (yeni lamba kapalı) |
+| `p->toggle(); (*p).show();` | `ON` |
+| `arr[1].toggle(); arr[0].show();` | `OFF` (arr[0]'a dokunulmadı) |
+| `arr[1].show();` | `ON` |
 
 ---
 
-## Örnek 9 – İki sınıfın ortak friend fonksiyonu
+## Örnek 11 – Friend class
+
+```cpp
+#include <iostream>
+using namespace std;
+
+class Teacher;
+
+class Student {
+    int grade;
+public:
+    Student() { grade = 0; }
+    void show() { cout << "Grade: " << grade << endl; }
+    friend class Teacher;
+};
+
+class Teacher {
+public:
+    void giveGrade(Student &s, int g) { s.grade = g; }
+};
+
+int main() {
+    Student st;
+    Teacher t;
+
+    st.show();
+    t.giveGrade(st, 85);
+    st.show();
+
+    return 0;
+}
+```
+
+**Çıktı:**
+
+```
+Grade: 0
+Grade: 85
+```
+
+**Ne öğretiyor?**
+
+Dersteki `class A` / `class B` örneğiyle aynı kalıp.
+
+- `grade` private; `main` ona doğrudan erişemez.
+- `friend class Teacher;` → Teacher sınıfının **bütün fonksiyonları** Student'ın private üyelerine erişebilir. Bu yüzden `s.grade = g;` hata vermiyor.
+- `giveGrade(Student &s, int g)`: `&` olduğu için **asıl** öğrencinin notu değişiyor (0 → 85).
+- Arkadaşlık **tek yönlüdür**: Teacher, Student'ın private'larını görür; Student, Teacher'ınkileri göremez.
+
+---
+
+## Örnek 12 – İki sınıfın ortak friend fonksiyonu
 
 ```cpp
 #include <iostream>
@@ -499,82 +706,9 @@ Different area
 
 `sameArea` fonksiyonu **iki farklı sınıfın** private değişkenlerine erişiyor (`r.w`, `r.h` ve `s.side`). Bunun için **her iki sınıf da** onu `friend` ilan etmeli.
 
-- **`class Square;` satırı burada gerçekten şart.** `Rectangle` sınıfının içinde `Square` ismi geçiyor ama `Square` daha aşağıda tanımlı. Bu satır silinirse derleyici hata verir.
+- **`class Square;` satırı burada şart.** `Rectangle` sınıfının içinde `Square` ismi geçiyor ama `Square` daha aşağıda tanımlı.
 - Fonksiyon `bool` döndürüyor ve `if` içinde doğrudan kullanılıyor (Labwork 2'deki `exceedsRiskLimit` gibi).
 - Hesap: 2 × 8 = 16; 4 × 4 = 16 (aynı), 5 × 5 = 25 (farklı).
-
----
-
-## Örnek 10 – `static` üye (muhtemelen sıradaki konu)
-
-> Bu konuyu derste henüz görmediysen midterm'de çıkmaz. Ex 1–3'teki **global sayaç** fikrinin sınıf içine alınmış hali olduğu için buraya ekledim.
-
-```cpp
-#include <iostream>
-using namespace std;
-
-class Player {
-    int id;
-    static int count;
-public:
-    Player() {
-        count++;
-        id = count;
-        cout << "Player " << id << " joined" << endl;
-    }
-    ~Player() {
-        count--;
-        cout << "Player " << id << " left" << endl;
-    }
-    static int getCount() { return count; }
-};
-
-int Player::count = 0;
-
-int main() {
-    cout << Player::getCount() << endl;
-
-    Player a, b;
-    cout << Player::getCount() << endl;
-
-    {
-        Player c;
-        cout << Player::getCount() << endl;
-    }
-
-    cout << Player::getCount() << endl;
-    return 0;
-}
-```
-
-**Çıktı:**
-
-```
-0
-Player 1 joined
-Player 2 joined
-2
-Player 3 joined
-3
-Player 3 left
-2
-Player 2 left
-Player 1 left
-```
-
-**Ne öğretiyor?**
-
-Normal üye değişkenler (`id`) **her nesnede ayrıdır**. `static` üye değişken (`count`) ise **bütün nesneler için tek bir tanedir**; tıpkı global değişken gibi, ama sınıfın içinde ve private olabilir.
-
-| | `id` (normal) | `count` (static) |
-|---|---|---|
-| Kaç tane var? | her nesnede ayrı | **tek** |
-| Kime ait? | nesneye | sınıfa |
-| Nasıl erişilir? | nesne üzerinden (`a.` ile) | `Player::getCount()` (nesne olmadan da) |
-
-- `int Player::count = 0;` → static değişken sınıfın **dışında** bir kez tanımlanıp başlatılır.
-- Her constructor `count`'u 1 artırıyor, her destructor 1 azaltıyor. Böylece `count` o an **kaç oyuncu yaşadığını** gösteriyor: 0 → 2 → 3 → 2.
-- Blok bitince `c` yok oldu (`Player 3 left`) ve sayı 2'ye düştü.
 
 ---
 ---
@@ -584,15 +718,13 @@ Normal üye değişkenler (`id`) **her nesnede ayrıdır**. `static` üye deği�
 **Constructor / destructor**
 - Nesne oluşturulurken **kaç değer** verildiğine bak; ona uyan constructor çalışır.
 - Değer eksikse **varsayılan değer** kullanılır (`int = 4` gibi).
-- Destructor'lar **oluşturulma sırasının tersine** çalışır.
-- `{ }` bloğundaki nesne, **blok bitince** yok olur.
-- `new` ile oluşturulan nesne **sadece `delete` ile** yok olur.
-- `Sinif arr[5];` yazabilmek için **parametresiz** (ya da hepsi varsayılan değerli) constructor gerekir.
+- Destructor'lar **oluşturulma sırasının tersine** çalışır (dizinin elemanları da).
+- `Sinif arr[5];` yazınca her eleman için **parametresiz** (ya da varsayılan değerli) constructor çalışır.
 
 **Referans ve kopya**
 - `int &x` → asıl değişken değişir. `int x` → sadece kopya değişir.
-- Nesneyi değerle göndermek **kopya** oluşturur; kopya fonksiyon bitince yok olur (destructor çalışır).
-- `int &x` parametresine `5` gibi sabit sayı gönderilemez.
+- `const int &x` → asıl değişken gelir ama **değiştirilemez**.
+- Referans, tanımlandığı satırda bağlanmak zorundadır (`int &r;` hata).
 
 **Global / yerel**
 - Aynı isimde yerel değişken varsa sadece isim yazınca **yerel**, `::isim` yazınca **global** kullanılır.
@@ -601,15 +733,20 @@ Normal üye değişkenler (`id`) **her nesnede ayrıdır**. `static` üye deği�
 **Üye değişkenler**
 - Her nesnenin **kendi** a'sı, b'si vardır. `obj1.f()` içindeki a → obj1'in a'sı.
 - `const` ve referans üyelere sadece **initialization list** ile değer verilir.
+- `private` üyelere `main`'den erişilemez; get/set fonksiyonları ya da friend gerekir.
 
 **Zincirleme**
 - Dönüş tipi `Sinif&`, son satır `return *this;`.
-- `&` unutulursa zincirin devamı **kopya** üzerinde çalışır.
+- Parametre adı değişken adıyla aynıysa `this->` **zorunlu**.
 
 **Friend**
 - Sınıfın üyesi değildir: `this` yoktur, **nokta olmadan** çağrılır, gövdesinde `Sinif::` yazılmaz.
 - `friend` kelimesi sadece sınıfın içindeki bildirimde yazılır.
 
 **Varsayılan parametre**
-- Varsayılan değerler **sağdan** başlamalı: `f(int a, int b = 2)` olur, `f(int a = 1, int b)` olmaz.
+- Gönderilen değerler **soldan sağa** yerleşir; eksik kalanlar varsayılan değeri alır.
 - Varsayılan değer sadece **bildirimde** yazılır, dışarıdaki gövdede tekrar yazılmaz.
+
+**Dinamik bellek**
+- `new ...[n]` ile alınan yer `delete[]`, `new ...` ile alınan tek nesne `delete` ile geri verilir.
+- Sınıf içinde `new` kullanıldıysa `delete` **destructor'da** yazılır.
