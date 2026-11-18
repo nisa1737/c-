@@ -3,9 +3,11 @@
 Bu dosyada **22 kısa alıştırma** var. Her biri tek bir konuyu öğretiyor ve genelde sadece **kodun bir parçasını** (bir fonksiyon, bir constructor, birkaç satır) yazmanı istiyor.
 Midterm sorularından farklı, hepsi yeni; konular derste, lab'larda ve recitation'da gördüğün konular.
 
+**Soru kısımları (Task) sınavdaki gibi İngilizce, cevaplar ve açıklamalar Türkçe.**
+
 **Nasıl çalışmalısın?**
 
-1. İsteği oku, kağıda ya da bilgisayara **kendin yaz**.
+1. Görevi (Task) oku, kağıda ya da bilgisayara **kendin yaz**.
 2. Sonra hemen altındaki **Cevap**'a bak ve karşılaştır.
 3. **Neden?** kısmını mutlaka oku; asıl öğreten kısım orası.
 
@@ -29,11 +31,11 @@ Bütün cevaplar derlenip çalıştırıldı; çıktılar gerçek çıktılardı
 
 ## Alıştırma 1 – Namespace
 
-**İstek:** `Geometry` adında bir namespace yaz. İçinde:
-- `double PI = 3.14;`
-- yarıçapı alıp dairenin alanını (PI × r × r) döndüren `circleArea` fonksiyonu
+**Task:** Write a namespace called `Geometry` that contains:
+- a variable `double PI = 3.14;`
+- a function `circleArea` that takes the radius and returns the area of the circle (PI × r × r).
 
-olsun. Sonra `main`'de r = 2 için alanı ve PI'ı yazdır. (`using namespace Geometry;` **kullanma**.)
+Then, in the main function, print the area for r = 2 and the value of PI. (Do **not** use `using namespace Geometry;`.)
 
 **Cevap:**
 
@@ -63,8 +65,8 @@ int main() {
 
 ## Alıştırma 2 – Varsayılan parametre
 
-**İstek:** `power(base, exp)` fonksiyonunu yaz: base'in exp'inci kuvvetini döndürsün (döngüyle). **exp verilmezse 2 olsun.**
-Şu çağrıların sonucu ne olur: `power(5)`, `power(2, 3)`, `power(7, 0)`?
+**Task:** Write a function `power(base, exp)` that returns base raised to the power exp (use a loop). If `exp` is not provided, it should be **2 by default**.
+What are the results of the following calls: `power(5)`, `power(2, 3)`, `power(7, 0)`?
 
 **Cevap:**
 
@@ -88,11 +90,11 @@ int power(int base, int exp = 2) {
 
 ## Alıştırma 3 – Function overloading
 
-**İstek:** `biggest` adında **iki** fonksiyon yaz:
-- biri 2 sayı alıp büyüğünü döndürsün,
-- diğeri 3 sayı alıp en büyüğünü döndürsün.
+**Task:** Write **two** overloaded functions named `biggest`:
+- one takes 2 integers and returns the bigger one,
+- the other takes 3 integers and returns the biggest one.
 
-**İpucu:** 3 sayılı olan, 2 sayılı olanı kullanabilir.
+**Hint:** The 3-parameter version can use the 2-parameter version.
 
 **Cevap:**
 
@@ -119,7 +121,7 @@ int biggest(int a, int b, int c) {
 
 ## Alıştırma 4 – Template
 
-**İstek:** İki değerin ortalamasını döndüren `average` fonksiyonunu **template** olarak yaz. Sonra şunların çıktısını tahmin et:
+**Task:** Write a **function template** named `average` that returns the average of two values. Then predict the output of the following lines:
 
 ```cpp
 cout << average(3, 4) << endl;
@@ -152,7 +154,7 @@ T average(T a, T b) {
 
 ## Alıştırma 5 – Referans parametre
 
-**İstek:** `sortTwo(a, b)` fonksiyonunu yaz: a, b'den büyükse ikisini **yer değiştirsin**; böylece fonksiyondan sonra a her zaman küçük olan olsun. `main`'deki değişkenler gerçekten değişmeli.
+**Task:** Write a function `sortTwo(a, b)`: if `a` is greater than `b`, it should **swap** them, so that `a` always holds the smaller value after the call. The variables in main must really change.
 
 **Cevap:**
 
@@ -181,7 +183,7 @@ cout << x << " " << y;     // 4 9
 
 ## Alıştırma 6 – Referans çıktı sorusu
 
-**İstek:** Çıktıyı bul.
+**Task:** What is the output of the following program?
 
 ```cpp
 void change(int a, int &b, const int &c) {
@@ -220,12 +222,12 @@ int main() {
 
 ## Alıştırma 7 – Get, set ve const
 
-**İstek:** `Thermometer` sınıfını yaz:
-- private: `double celsius;`
-- `setCelsius(double)`: değer **−273'ten küçükse** "Invalid!" yazsın ve değeri **değiştirmesin**.
-- `getCelsius()`: celsius'u döndürsün.
-- `toFahrenheit()`: celsius × 9 / 5 + 32 döndürsün.
-- Sadece okuyan fonksiyonlar `const` olsun.
+**Task:** Write a class `Thermometer` with:
+- a private data member `double celsius;`
+- `setCelsius(double)`: if the value is **less than −273**, it prints `Invalid!` and does **not** change the value.
+- `getCelsius()`: returns celsius.
+- `toFahrenheit()`: returns celsius × 9 / 5 + 32.
+- Functions that only read data must be `const`.
 
 **Cevap:**
 
@@ -262,7 +264,7 @@ cout << t.getCelsius() << " " << t.toFahrenheit() << endl;   // 25 77
 
 ## Alıştırma 8 – Varsayılan değerli constructor
 
-**İstek:** `Clock` sınıfı: `hour` ve `minute`. **Tek bir constructor** yaz; ama şu üç satır da çalışsın:
+**Task:** Write a class `Clock` with the data members `hour` and `minute`. Write **only one constructor**, but all three lines below must work:
 
 ```cpp
 Clock c1;          // 0:0
@@ -270,7 +272,7 @@ Clock c2(9);       // 9:0
 Clock c3(14, 30);  // 14:30
 ```
 
-Constructor'da **initialization list** kullan. `display()` "saat:dakika" yazsın.
+Use an **initialization list** in the constructor. `display()` prints the time as "hour:minute".
 
 **Cevap:**
 
@@ -298,12 +300,12 @@ public:
 
 ## Alıştırma 9 – Constructor overloading
 
-**İstek:** `Rectangle` sınıfına **üç** constructor yaz:
-- parametresiz → 1 × 1
-- tek parametreli (side) → kare: side × side
-- iki parametreli (w, h) → w × h
+**Task:** Write **three** constructors for the class `Rectangle`:
+- a default constructor → 1 × 1
+- a constructor with one parameter (side) → a square: side × side
+- a constructor with two parameters (w, h) → w × h
 
-ve `area()` fonksiyonu. `Rectangle r1, r2(5), r3(2, 7);` için alanlar ne olur?
+and an `area()` function. What are the areas for `Rectangle r1, r2(5), r3(2, 7);`?
 
 **Cevap:**
 
@@ -326,7 +328,7 @@ public:
 
 ## Alıştırma 10 – const üye
 
-**İstek:** Aşağıdaki sınıfın constructor'ını yaz:
+**Task:** Write the constructor of the following class:
 
 ```cpp
 class Order {
@@ -360,7 +362,7 @@ Order(int n, double t) : orderNo(n), total(t) { }
 
 ## Alıştırma 11 – Doğum ve ölüm sırası
 
-**İstek:** Çıktıyı bul (hepsi tek satır).
+**Task:** What is the output of the following program? (The output is a single line.)
 
 ```cpp
 class Tag {
@@ -396,20 +398,20 @@ int main() {
 
 ## Alıştırma 12 – Dinamik dizi
 
-**İstek:** Boşlukları doldur. Kullanıcı n girer; n elemanlı bir dizi oluşturulur, içine 1², 2², 3², ... yazılır, yazdırılır ve bellek geri verilir.
+**Task:** Fill in the blanks. The user enters n; an array of n elements is created dynamically, filled with 1², 2², 3², ..., printed, and then the memory is freed.
 
 ```cpp
 int n;
 cin >> n;
 
-______________________________     // 1) diziyi olustur
+______________________________     // 1) create the array
 for (int i = 0; i < n; i++)
-    ______________________________ // 2) kareleri yaz
+    ______________________________ // 2) store the squares
 
 for (int i = 0; i < n; i++)
     cout << squares[i] << " ";
 
-______________________________     // 3) bellegi geri ver
+______________________________     // 3) free the memory
 ```
 
 **Cevap:**
@@ -431,7 +433,7 @@ delete[] squares;                        // 3
 
 ## Alıştırma 13 – new ile nesne ve `->`
 
-**İstek:** `Counter` sınıfı hazır. `main`'i yaz: `new` ile bir Counter oluştur, iki kere `increment()` çağır, değeri yazdır, belleği geri ver.
+**Task:** The class `Counter` is given. Write the main function: create a Counter object **dynamically** using `new`, call `increment()` twice, print the value, and free the memory.
 
 ```cpp
 class Counter {
@@ -464,9 +466,9 @@ int main() {
 
 ## Alıştırma 14 – Sınıfın içinde dinamik dizi
 
-**İstek:** Constructor'ı ve destructor'ı yaz.
-- Constructor: `size`'ı kaydet, `new` ile dizi oluştur, hepsini 0 yap.
-- Destructor: diziyi geri ver, "ScoreBoard deleted" yaz.
+**Task:** Write the constructor and the destructor of the class below.
+- Constructor: stores `size`, **dynamically allocates** the array, and sets all elements to 0.
+- Destructor: frees the array and prints `ScoreBoard deleted`.
 
 ```cpp
 class ScoreBoard {
@@ -523,7 +525,7 @@ cout << sb.best() << endl;     // 75
 
 ## Alıştırma 15 – `char*` metin kopyalama
 
-**İstek:** `Label` sınıfının constructor'ını yaz. Parametre adı değişkenle aynı (`text`), yani `this->` kullan. Metin için `new` ile **tam gerektiği kadar** yer ayır ve kopyala.
+**Task:** Write the constructor of the class `Label`. The parameter name is the same as the data member (`text`), so use the **this pointer**. **Dynamically allocate** exactly enough memory for the text and copy it.
 
 ```cpp
 class Label {
@@ -563,7 +565,7 @@ Label(const char *text) {
 
 ## Alıştırma 16 – Zincirlenebilir set fonksiyonları
 
-**İstek:** `Phone` sınıfına `setBrand` ve `setPrice` yaz. Parametre isimleri değişkenlerle **aynı** olsun ve şu satır çalışsın:
+**Task:** Write `setBrand` and `setPrice` for the class `Phone`. The parameter names must be the **same** as the data members, and the following line must work:
 
 ```cpp
 p.setBrand("Nokia").setPrice(5000);
@@ -575,7 +577,7 @@ class Phone {
     int price;
 public:
     Phone() : brand(""), price(0) { }
-    // setBrand ve setPrice
+    // setBrand and setPrice
     void show() const { cout << brand << " - " << price << " TL" << endl; }
 };
 ```
@@ -607,7 +609,7 @@ Phone& setPrice(int price) {
 
 ## Alıştırma 17 – Yeni nesne döndüren fonksiyon
 
-**İstek:** `Money` sınıfına `add` üye fonksiyonunu yaz: başka bir Money alsın, iki paranın toplamını **yeni bir Money** olarak döndürsün. İki nesne de **değişmesin**.
+**Task:** Write the member function `add` for the class `Money`: it takes another Money object and returns the sum of the two as a **new Money object**. Neither object should be **changed**.
 
 ```cpp
 class Money {
@@ -645,16 +647,16 @@ a.show();     // 30 TL  (a degismedi)
 
 ## Alıştırma 18 – Friend fonksiyon
 
-**İstek:** `Pen` sınıfına, iki kalemin rengi aynıysa `true` döndüren `sameColor` **friend** fonksiyonunu ekle. Bildirimi ve gövdesini yaz.
+**Task:** Add a **friend function** `sameColor` to the class `Pen` that returns `true` if two pens have the same color. Write both the declaration and the definition.
 
 ```cpp
 class Pen {
     string color;
 public:
     Pen(string c) : color(c) { }
-    // friend bildirimi
+    // friend declaration
 };
-// govde
+// definition
 ```
 
 **Cevap:**
@@ -684,7 +686,7 @@ cout << sameColor(a, b) << " " << sameColor(a, c);   // 0 1
 
 ## Alıştırma 19 – Friend class
 
-**İstek:** `Safe` sınıfının private `code`'unu `Locksmith` sınıfının okuyabilmesi için `Safe`'e **tek satır** ekle.
+**Task:** Add **one line** to the class `Safe` so that the class `Locksmith` can read its private member `code`.
 
 ```cpp
 class Safe {
@@ -719,7 +721,7 @@ friend class Locksmith;
 
 ## Alıştırma 20 – Nesne dizisi
 
-**İstek:** Çıktıyı bul (tek satır).
+**Task:** What is the output of the following program? (The output is a single line.)
 
 ```cpp
 class Item {
@@ -759,7 +761,7 @@ int main() {
 
 ## Alıştırma 21 – Struct template
 
-**İstek:** `Box` adında bir **struct template** yaz: içinde T tipinde `value` olsun ve `value * 2` döndüren `doubled()` fonksiyonu olsun. Sonra bir `int` ve bir `double` kutu oluştur.
+**Task:** Write a **struct template** named `Box` that has a member `value` of type T and a function `doubled()` that returns `value * 2`. Then create one `int` box and one `double` box.
 
 **Cevap:**
 
@@ -788,7 +790,7 @@ int main() {
 
 ## Alıştırma 22 – Aynı isim: üye, parametre, global
 
-**İstek:** Çıktıyı bul. Dikkat: `level` adında **üç farklı şey** var.
+**Task:** What is the output of the following program? Be careful: there are **three different things** named `level`.
 
 ```cpp
 int level = 1;
