@@ -158,7 +158,7 @@ T average(T a, T b) {
 
 ## Alıştırma 5 – Referans parametre
 
-**Task:** Write a function `sortTwo(a, b)`: if `a` is greater than `b`, it should **swap** them, so that `a` always holds the smaller value after the call. The variables in main must really change.
+**Task:** Write a function `sortTwo(a, b)`: if `a` is greater than `b`, it should **swap** them, so that `a` always holds the smaller value after the call. The variables in main must really change, so use **reference parameters**.
 
 **Cevap:**
 
@@ -648,6 +648,7 @@ a.show();     // 30 TL  (a degismedi)
 - Dönüş tipi `Money` (`&` yok): yeni bir sonuç üretiyoruz, aynı nesneyi değiştirmiyoruz.
 - `const Money &m` → kopya yok ve m değiştirilemez. Sondaki `const` → a da değiştirilemez.
 - `m.lira` private olduğu halde erişilebiliyor, çünkü `add` **aynı sınıfın** fonksiyonu.
+- Soru parametrenin tam yazılışını vermiyor. `Money add(Money m)` yazsan da **çalışır ve doğrudur**; `const Money &m` sadece daha iyi bir alışkanlık (kopya yapılmaz, m değiştirilemez).
 
 ---
 
