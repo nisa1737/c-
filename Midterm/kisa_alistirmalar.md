@@ -269,7 +269,7 @@ cout << t.getCelsius() << " " << t.toFahrenheit() << endl;   // 25 77
 
 ## Alıştırma 8 – Varsayılan değerli constructor
 
-**Task:** Write a class `Clock` with the data members `hour` and `minute`. Write **only one constructor**, but all three lines below must work:
+**Task:** Write a class `Clock` with the data members `hour` and `minute`. Write **only one parameterized constructor** that takes the hour and the minute as parameters, **both with a default value of 0**, so that all three lines below work:
 
 ```cpp
 Clock c1;          // 0:0
@@ -299,6 +299,7 @@ public:
 
 **Neden?**
 - İki parametrenin de varsayılan değeri olduğu için tek constructor 0, 1 ya da 2 değerle çağrılabiliyor.
+- Soru bunu açıkça söylemeseydi bile üç satırdan anlaşılırdı: `c3(14, 30)` → 2 parametre gerekli; `c2(9)` ve `c1` → eksik değerler için varsayılan değer gerekli.
 - `: hour(h), minute(m)` → initialization list: hour'a h, minute'a m konur.
 
 ---
