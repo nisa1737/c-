@@ -11,6 +11,10 @@ Midterm sorularından farklı, hepsi yeni; konular derste, lab'larda ve recitati
 2. Sonra hemen altındaki **Cevap**'a bak ve karşılaştır.
 3. **Neden?** kısmını mutlaka oku; asıl öğreten kısım orası.
 
+**İsimler hakkında:** Soruda adı **verilen** şeyleri (sınıf, fonksiyon, değişken isimleri) aynen kullan.
+Soruda adı **verilmeyen** şeylerin (fonksiyon parametreleri, döngü değişkenleri, `main`'deki nesneler) adını **sen seçersin**.
+Cevaplardaki `c`, `n`, `t`, `m` gibi isimler benim seçimim; sen farklı bir isim verirsen cevabın yine doğru olur.
+
 Bütün cevaplar derlenip çalıştırıldı; çıktılar gerçek çıktılardır.
 
 | Bölüm | Konu | Alıştırmalar |
@@ -257,6 +261,7 @@ cout << t.getCelsius() << " " << t.toFahrenheit() << endl;   // 25 77
 **Neden?**
 - `celsius` private olduğu için `main`'den `t.celsius = -300;` yazılamaz. Değer **sadece `setCelsius` üzerinden** değişebiliyor ve o da kontrol ediyor. Encapsulation'ın faydası bu.
 - `setCelsius` değiştirdiği için `const` **değil**; get ve toFahrenheit sadece okuduğu için `const`.
+- Parametrenin adı (`c`) soruda verilmiyor; **ben seçtim**. `value`, `temp` gibi istediğin ismi verebilirsin. Adını `celsius` koyarsan değişkenle aynı olur; o zaman `this->celsius = celsius;` yazman gerekir.
 
 ---
 
