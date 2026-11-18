@@ -654,7 +654,7 @@ a.show();     // 30 TL  (a degismedi)
 
 ## Alıştırma 18 – Friend fonksiyon
 
-**Task:** Add a **friend function** `sameColor` to the class `Pen` that returns `true` if two pens have the same color. Write both the declaration and the definition.
+**Task:** Add a **friend function** `sameColor` to the class `Pen`. It takes **two Pen objects** as parameters (use **const references**) and returns `true` if the two pens have the same color. Write both the declaration and the definition.
 
 ```cpp
 class Pen {
@@ -688,6 +688,9 @@ cout << sameColor(a, b) << " " << sameColor(a, c);   // 0 1
 - `friend` kelimesi **sadece** sınıfın içindeki bildirimde yazılır. Gövdede yok, başında `Pen::` da yok (üye değil).
 - Üye olmadığı için `this` yok; nesnelere **parametrelerle** ulaşır ve **nokta olmadan** çağrılır: `sameColor(a, b)`.
 - `cout` bir bool yazdırınca `true`/`false` değil **1/0** çıkar.
+- **Neden iki parametre?** İki kalemi karşılaştırıyoruz ve friend'in `this`'i yok; kullanacağı **her nesne parametreyle** gelmeli. (Üye fonksiyon olsaydı tek parametre yeterdi: `a.sameColor(b)`.)
+- **`&` zorunlu mu?** Hayır, friend'in kuralı değil. `bool sameColor(Pen p1, Pen p2)` de çalışır. `const Pen &` daha iyi bir alışkanlık: kopya yapılmaz ve fonksiyon kalemleri değiştiremez. Soru ya da tablo açıkça yazıyorsa aynen öyle yazmalısın.
+- `p1`, `p2` isimleri serbest; `a`, `b` de olur.
 
 ---
 
